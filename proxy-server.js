@@ -278,7 +278,7 @@ const server = http.createServer((req, res) => {
 
 // 启动服务器
 server.listen(PORT, () => {
-    console.log('=== 河北电视台直播代理服务器 (优化版) ===');
+    console.log('=== proxy service (优化版) ===');
     console.log(`服务器运行在: http://localhost:${PORT}`);
     console.log('');
     console.log('使用方式:');
