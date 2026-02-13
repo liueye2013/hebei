@@ -1,4 +1,4 @@
-// 河北电视台直播代理服务器
+// proxyservice
 // 优化版本：高效使用签名，稳定返回官网链接
 
 const http = require('http');
