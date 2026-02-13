@@ -1,0 +1,20 @@
+{
+  "name": "tvwork-proxy",
+  "version": "1.0.0",
+  "description": "河北电视台直播代理服务器",
+  "main": "proxy-server.js",
+  "scripts": {
+    "start": "node proxy-server.js"
+  },
+  "keywords": [
+    "proxy",
+    "live",
+    "tv",
+    "hebei"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
