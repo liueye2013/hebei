@@ -174,8 +174,6 @@ async function updateCache(channel) {
         timestamp: now
     };
     
-    console.log(`[签名更新] ${channel} 频道 - t: ${t}, k: ${k}`);
-    
     return tkCache[channel];
 }
 
