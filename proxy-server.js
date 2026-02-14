@@ -5,7 +5,7 @@ const http = require('http');
 const url = require('url');
 
 // 配置
-const PORT = 3002;
+const PORT = 8080;
 const LIVE_KEY = "k5m9p2x8r4b3";
 const TK_CACHE_DURATION = 5 * 60 * 1000; // 5分钟缓存
 const CHANNELS = {
