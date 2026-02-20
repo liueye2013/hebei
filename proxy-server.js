@@ -14,7 +14,8 @@ const CHANNELS = {
     gonggong: "/jishi/gonggongpindao.m3u8",
     shenghuo: "/jishi/shenghuopindao.m3u8",
     jingji: "/jishi/jingjishenghuo.m3u8",
-    nongmin: "/jishi/nongminpindao.m3u8"
+    nongmin: "/jishi/nongminpindao.m3u8",
+    yingshi: "/zhibo/yingshijupindao.m3u8"
 };
 
 // 缓存对象 - 只存储t和k参数
