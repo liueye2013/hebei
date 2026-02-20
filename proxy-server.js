@@ -7,7 +7,7 @@ const url = require('url');
 // 配置
 const PORT = 8080;
 const LIVE_KEY = "k5m9p2x8r4b3";
-const TK_CACHE_DURATION = 5 * 60 * 1000; // 5分钟缓存
+const TK_CACHE_DURATION = 10 * 60 * 1000; // 5分钟缓存
 const CHANNELS = {
     weishi: "/jishi/weishipindao.m3u8",
     dushi: "/jishi/dushipindao.m3u8",
