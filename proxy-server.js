@@ -4,6 +4,7 @@ const http = require('http');
 const url = require('url');
 const hb = require('./hb');
 const sd = require('./sd');
+const zj = require('./zj');
 
 // 服务器配置
 const PORT = 8080;
@@ -11,7 +12,8 @@ const PORT = 8080;
 // 路由配置：路径前缀 -> 模块
 const ROUTES = {
     '/hb/': hb,
-    '/sd/': sd
+    '/sd/': sd,
+    '/zj/': zj
 };
 
 // 处理请求
@@ -103,6 +105,28 @@ function handleRequest(req, res) {
             });
             res.end('Server Error: ' + err.message);
         });
+    } else if (module === zj) {
+        // ZJ模块：返回流地址重定向
+        module.getStreamUrl(channel).then(streamUrl => {
+            const processingTime = Date.now() - startTime;
+            console.log(`[ZJ] ${channel} -> ${streamUrl} (${processingTime}ms)`);
+
+            res.writeHead(302, {
+                'Location': streamUrl,
+                'Access-Control-Allow-Origin': '*',
+                'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+                'Pragma': 'no-cache',
+                'Expires': '0'
+            });
+            res.end();
+        }).catch(err => {
+            console.error(`[ZJ] ${channel} 失败:`, err);
+            res.writeHead(500, {
+                'Content-Type': 'text/plain; charset=utf-8',
+                'Access-Control-Allow-Origin': '*'
+            });
+            res.end('Server Error: ' + err.message);
+        });
     }
 }
 
@@ -136,6 +160,10 @@ server.listen(PORT, () => {
     console.log('SD:');
     for (const channel of sd.getChannelList()) {
         console.log(`  - /sd/${channel}.m3u8`);
+    }
+    console.log('ZJ:');
+    for (const channel of zj.getChannelList()) {
+        console.log(`  - /zj/${channel}.m3u8`);
     }
     console.log('服务已启动');
 });
