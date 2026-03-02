@@ -35,8 +35,8 @@ async function handleRequest(req, res) {
 
             console.log(`[FTV] ${linkIndex + 1} -> ${targetUrl} (${Date.now() - startTime}ms)`);
 
-            res.writeHead(200, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
-            res.end(targetUrl);
+            res.writeHead(302, { 'Location': targetUrl, 'Access-Control-Allow-Origin': '*' });
+            res.end();
         } catch (err) {
             res.writeHead(500, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
             res.end('');
