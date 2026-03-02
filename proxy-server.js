@@ -1,169 +1,120 @@
-// proxy-server.js - 服务入口
-
 const http = require('http');
 const url = require('url');
 const hb = require('./hb');
 const sd = require('./sd');
 const zj = require('./zj');
+const freetv = require('./freetv');
 
-// 服务器配置
 const PORT = 8080;
 
-// 路由配置：路径前缀 -> 模块
 const ROUTES = {
     '/hb/': hb,
     '/sd/': sd,
     '/zj/': zj
 };
 
-// 处理请求
-function handleRequest(req, res) {
+async function handleRequest(req, res) {
     const startTime = Date.now();
     const parsedUrl = url.parse(req.url);
     const path = parsedUrl.pathname;
 
-    // 解析路径格式: /模块/频道.m3u8 或 /频道.m3u8 (默认hb)
+    // FTV 接口 /ftv/1.m3u8, /ftv/2.m3u8, /ftv/3.m3u8
+    const ftvMatch = path.match(/^\/ftv\/(\d)\.m3u8$/);
+    if (ftvMatch) {
+        const linkIndex = parseInt(ftvMatch[1]) - 1;
+
+        try {
+            const links = await freetv.getChannelLinks('鳳凰');
+            const targetUrl = links[linkIndex];
+
+            if (!targetUrl) {
+                res.writeHead(404, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
+                res.end('');
+                return;
+            }
+
+            console.log(`[FTV] ${linkIndex + 1} -> ${targetUrl} (${Date.now() - startTime}ms)`);
+
+            res.writeHead(200, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
+            res.end(targetUrl);
+        } catch (err) {
+            res.writeHead(500, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
+            res.end('');
+        }
+        return;
+    }
+
+    // 解析路径格式: /模块/频道.m3u8
     let module = hb;
     let channelPath = path;
 
     for (const [prefix, mod] of Object.entries(ROUTES)) {
         if (path.startsWith(prefix)) {
             module = mod;
-            channelPath = path.slice(prefix.length - 1); // 保留 /
+            channelPath = path.slice(prefix.length - 1);
             break;
         }
     }
 
-    // 解析频道名
     const match = channelPath.match(/^\/([a-z]+)\.m3u8$/);
     if (!match) {
-        res.writeHead(404, {
-            'Content-Type': 'text/plain; charset=utf-8',
-            'Access-Control-Allow-Origin': '*'
-        });
-        res.end('Not Found. Usage: /hb/weishi.m3u8 or /sd/qilu.m3u8');
+        res.writeHead(404, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
+        res.end('Not Found');
         return;
     }
 
     const channel = match[1];
 
-    // 检查频道是否存在
     if (!module.isChannelExists(channel)) {
-        res.writeHead(404, {
-            'Content-Type': 'text/plain; charset=utf-8',
-            'Access-Control-Allow-Origin': '*'
-        });
-        res.end(`Channel '${channel}' not supported`);
+        res.writeHead(404, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
+        res.end('Channel not found');
         return;
     }
 
-    // 根据模块类型处理
     if (module === hb) {
-        // HB模块：返回重定向
         module.updateCache(channel).then(cache => {
-            const { t, k } = cache;
-            const targetUrl = module.buildTargetUrl(channel, t, k);
-
-            const processingTime = Date.now() - startTime;
-            console.log(`[HB] ${channel} -> ${targetUrl} (${processingTime}ms)`);
-
-            res.writeHead(302, {
-                'Location': targetUrl,
-                'Access-Control-Allow-Origin': '*',
-                'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-                'Pragma': 'no-cache',
-                'Expires': '0'
-            });
+            const targetUrl = module.buildTargetUrl(channel, cache.t, cache.k);
+            console.log(`[HB] ${channel} -> ${targetUrl} (${Date.now() - startTime}ms)`);
+            res.writeHead(302, { 'Location': targetUrl, 'Access-Control-Allow-Origin': '*' });
             res.end();
-        }).catch(err => {
-            console.error(`[HB] ${channel} 失败:`, err);
-            res.writeHead(500, {
-                'Content-Type': 'text/plain; charset=utf-8',
-                'Access-Control-Allow-Origin': '*'
-            });
-            res.end('Server Error: ' + err.message);
+        }).catch(() => {
+            res.writeHead(500, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
+            res.end('Error');
         });
     } else if (module === sd) {
-        // SD模块：返回流地址重定向
         module.getStreamUrl(channel).then(streamUrl => {
-            const processingTime = Date.now() - startTime;
-            console.log(`[SD] ${channel} -> ${streamUrl} (${processingTime}ms)`);
-
-            res.writeHead(302, {
-                'Location': streamUrl,
-                'Access-Control-Allow-Origin': '*',
-                'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-                'Pragma': 'no-cache',
-                'Expires': '0'
-            });
+            console.log(`[SD] ${channel} -> ${streamUrl} (${Date.now() - startTime}ms)`);
+            res.writeHead(302, { 'Location': streamUrl, 'Access-Control-Allow-Origin': '*' });
             res.end();
-        }).catch(err => {
-            console.error(`[SD] ${channel} 失败:`, err);
-            res.writeHead(500, {
-                'Content-Type': 'text/plain; charset=utf-8',
-                'Access-Control-Allow-Origin': '*'
-            });
-            res.end('Server Error: ' + err.message);
+        }).catch(() => {
+            res.writeHead(500, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
+            res.end('Error');
         });
     } else if (module === zj) {
-        // ZJ模块：返回流地址重定向
         module.getStreamUrl(channel).then(streamUrl => {
-            const processingTime = Date.now() - startTime;
-            console.log(`[ZJ] ${channel} -> ${streamUrl} (${processingTime}ms)`);
-
-            res.writeHead(302, {
-                'Location': streamUrl,
-                'Access-Control-Allow-Origin': '*',
-                'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-                'Pragma': 'no-cache',
-                'Expires': '0'
-            });
+            console.log(`[ZJ] ${channel} -> ${streamUrl} (${Date.now() - startTime}ms)`);
+            res.writeHead(302, { 'Location': streamUrl, 'Access-Control-Allow-Origin': '*' });
             res.end();
-        }).catch(err => {
-            console.error(`[ZJ] ${channel} 失败:`, err);
-            res.writeHead(500, {
-                'Content-Type': 'text/plain; charset=utf-8',
-                'Access-Control-Allow-Origin': '*'
-            });
-            res.end('Server Error: ' + err.message);
+        }).catch(() => {
+            res.writeHead(500, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
+            res.end('Error');
         });
     }
 }
 
-// 创建服务器
 const server = http.createServer((req, res) => {
     if (req.method === 'OPTIONS') {
-        res.writeHead(204, {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, Origin, Referer'
-        });
+        res.writeHead(204, { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, OPTIONS' });
         res.end();
         return;
     }
 
-    if (req.url.endsWith('.m3u8')) {
-        console.log(`[请求] ${req.url}`);
-    }
-
-    handleRequest(req, res);
+    handleRequest(req, res).catch(() => {
+        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.end('Error');
+    });
 });
 
-// 启动服务器
 server.listen(PORT, () => {
-    console.log(`服务运行在: http://localhost:${PORT}`);
-    console.log('可用路径:');
-    console.log('HB:');
-    for (const channel of hb.getChannelList()) {
-        console.log(`  - /hb/${channel}.m3u8`);
-    }
-    console.log('SD:');
-    for (const channel of sd.getChannelList()) {
-        console.log(`  - /sd/${channel}.m3u8`);
-    }
-    console.log('ZJ:');
-    for (const channel of zj.getChannelList()) {
-        console.log(`  - /zj/${channel}.m3u8`);
-    }
-    console.log('服务已启动');
+    console.log(`Server started on port ${PORT}`);
 });
