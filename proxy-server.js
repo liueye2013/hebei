@@ -18,28 +18,74 @@ async function handleRequest(req, res) {
     const parsedUrl = url.parse(req.url);
     const path = parsedUrl.pathname;
 
-    // FTV 接口 /ftv/1.m3u8, /ftv/2.m3u8, /ftv/3.m3u8
-    const ftvMatch = path.match(/^\/ftv\/(\d)\.m3u8$/);
-    if (ftvMatch) {
-        const linkIndex = parseInt(ftvMatch[1]) - 1;
-
+    // /CHCJT/1.m3u8
+    const chcMatch = path.match(/^\/CHCJT\/1\.m3u8$/);
+    if (chcMatch) {
         try {
-            const links = await freetv.getChannelLinks('鳳凰');
-            const targetUrl = links[linkIndex];
+            const links = await freetv.getChannelLinks('CHC家庭影院');
+            const targetUrl = links[0];
 
             if (!targetUrl) {
                 res.writeHead(404, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
-                res.end('');
+                res.end('Channel not found');
                 return;
             }
 
-            console.log(`[FTV] ${linkIndex + 1} -> ${targetUrl} (${Date.now() - startTime}ms)`);
+            console.log(`[CHCJT] -> ${targetUrl} (${Date.now() - startTime}ms)`);
 
             res.writeHead(302, { 'Location': targetUrl, 'Access-Control-Allow-Origin': '*' });
             res.end();
         } catch (err) {
             res.writeHead(500, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
             res.end('');
+        }
+        return;
+    }
+
+    // /CHCYM/1.m3u8
+    const chcymMatch = path.match(/^\/CHCYM\/1\.m3u8$/);
+    if (chcymMatch) {
+        try {
+            const links = await freetv.getChannelLinks('CHC影迷電影');
+            const targetUrl = links[0];
+
+            if (!targetUrl) {
+                res.writeHead(404, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
+                res.end('Channel not found');
+                return;
+            }
+
+            console.log(`[CHCYM] -> ${targetUrl} (${Date.now() - startTime}ms)`);
+
+            res.writeHead(302, { 'Location': targetUrl, 'Access-Control-Allow-Origin': '*' });
+            res.end();
+        } catch (err) {
+            res.writeHead(500, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
+            res.end('Server error');
+        }
+        return;
+    }
+
+    // /CHCDZ/1.m3u8
+    const chcdzMatch = path.match(/^\/CHCDZ\/1\.m3u8$/);
+    if (chcdzMatch) {
+        try {
+            const links = await freetv.getChannelLinks('CHC動作電影');
+            const targetUrl = links[0];
+
+            if (!targetUrl) {
+                res.writeHead(404, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
+                res.end('Channel not found');
+                return;
+            }
+
+            console.log(`[CHCDZ] -> ${targetUrl} (${Date.now() - startTime}ms)`);
+
+            res.writeHead(302, { 'Location': targetUrl, 'Access-Control-Allow-Origin': '*' });
+            res.end();
+        } catch (err) {
+            res.writeHead(500, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
+            res.end('Server error');
         }
         return;
     }
