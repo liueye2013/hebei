@@ -14,15 +14,13 @@ const CONFIG = {
 // 频道ID映射
 const CHANNELS = {
     sdtv: 24,
-    qilu: 25,
-    shpd: 29
+    qilu: 25
 };
 
 // 频道Mark映射 (用于获取流地址)
 const CHANNEL_MARKS = {
     sdtv: '24581',  // 山东卫视
-    qilu: '24584',  // 齐鲁频道
-    shpd: '24596'   // 生活频道
+    qilu: '24584'   // 齐鲁频道
 };
 
 // 缓存对象
