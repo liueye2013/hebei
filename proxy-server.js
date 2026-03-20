@@ -18,30 +18,6 @@ async function handleRequest(req, res) {
     const parsedUrl = url.parse(req.url);
     const path = parsedUrl.pathname;
 
-    // /CHCJT/1.m3u8
-    const chcMatch = path.match(/^\/CHCJT\/1\.m3u8$/);
-    if (chcMatch) {
-        try {
-            const links = await freetv.getChannelLinks('CHC家庭影院');
-            const targetUrl = links[0];
-
-            if (!targetUrl) {
-                res.writeHead(404, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
-                res.end('Channel not found');
-                return;
-            }
-
-            console.log(`[CHCJT] -> ${targetUrl} (${Date.now() - startTime}ms)`);
-
-            res.writeHead(302, { 'Location': targetUrl, 'Access-Control-Allow-Origin': '*' });
-            res.end();
-        } catch (err) {
-            res.writeHead(500, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
-            res.end('');
-        }
-        return;
-    }
-
     // /CHCYM/1.m3u8
     const chcymMatch = path.match(/^\/CHCYM\/1\.m3u8$/);
     if (chcymMatch) {
@@ -128,6 +104,30 @@ async function handleRequest(req, res) {
             }
 
             console.log(`[SSWS] -> ${targetUrl} (${Date.now() - startTime}ms)`);
+
+            res.writeHead(302, { 'Location': targetUrl, 'Access-Control-Allow-Origin': '*' });
+            res.end();
+        } catch (err) {
+            res.writeHead(500, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
+            res.end('Server error');
+        }
+        return;
+    }
+
+    // /HNWS/1.m3u8
+    const hnwsMatch = path.match(/^\/HNWS\/1\.m3u8$/);
+    if (hnwsMatch) {
+        try {
+            const links = await freetv.getChannelLinks('湖南衛視');
+            const targetUrl = links[0];
+
+            if (!targetUrl) {
+                res.writeHead(404, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
+                res.end('Channel not found');
+                return;
+            }
+
+            console.log(`[HNWS] -> ${targetUrl} (${Date.now() - startTime}ms)`);
 
             res.writeHead(302, { 'Location': targetUrl, 'Access-Control-Allow-Origin': '*' });
             res.end();

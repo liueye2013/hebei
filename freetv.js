@@ -7,11 +7,11 @@ const CACHE_DURATION = 6 * 60 * 60 * 1000; // 6小时
 
 // 用到的频道列表
 const CHANNELS = [
-    'CHC家庭影院',
     'CHC影迷電影',
     'CHC動作電影',
     '中視菁采臺',
-    '三沙衛視'
+    '三沙衛視',
+    '湖南衛視'
 ];
 
 // 缓存：{ channelName: { link: string, time: number } }
