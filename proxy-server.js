@@ -66,11 +66,11 @@ async function handleRequest(req, res) {
         return;
     }
 
-    // /ZSJC/1.m3u8
-    const zsjcMatch = path.match(/^\/ZSJC\/1\.m3u8$/);
-    if (zsjcMatch) {
+    // /GSWS/1.m3u8
+    const gswsMatch = path.match(/^\/GSWS\/1\.m3u8$/);
+    if (gswsMatch) {
         try {
-            const links = await freetv.getChannelLinks('中視菁采臺');
+            const links = await freetv.getChannelLinks('甘肅衛視');
             const targetUrl = links[0];
 
             if (!targetUrl) {
@@ -79,7 +79,7 @@ async function handleRequest(req, res) {
                 return;
             }
 
-            console.log(`[ZSJC] -> ${targetUrl} (${Date.now() - startTime}ms)`);
+            console.log(`[GSWS] -> ${targetUrl} (${Date.now() - startTime}ms)`);
 
             res.writeHead(302, { 'Location': targetUrl, 'Access-Control-Allow-Origin': '*' });
             res.end();

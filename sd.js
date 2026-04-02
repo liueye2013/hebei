@@ -19,8 +19,7 @@ const CHANNELS = {
 
 // 频道Mark映射 (用于获取流地址)
 const CHANNEL_MARKS = {
-    sdtv: '24581',  // 山东卫视
-    qilu: '24584'   // 齐鲁频道
+    sdtv: '24581'   // 山东卫视
 };
 
 // 缓存对象
