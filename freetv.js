@@ -11,7 +11,8 @@ const CHANNELS = [
     'CHC動作電影',
     '中視菁采臺',
     '三沙衛視',
-    '湖南衛視'
+    '湖南衛視',
+    '甘肅衛視'
 ];
 
 // 缓存：{ channelName: { link: string, time: number } }
