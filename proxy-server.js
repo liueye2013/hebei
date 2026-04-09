@@ -138,6 +138,30 @@ async function handleRequest(req, res) {
         return;
     }
 
+    // /SZWHSH/1.m3u8
+    const szwhshMatch = path.match(/^\/SZWHSH\/1\.m3u8$/);
+    if (szwhshMatch) {
+        try {
+            const links = await freetv.getChannelLinks('蘇州文化生活');
+            const targetUrl = links[0];
+
+            if (!targetUrl) {
+                res.writeHead(404, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
+                res.end('Channel not found');
+                return;
+            }
+
+            console.log(`[SZWHSH] -> ${targetUrl} (${Date.now() - startTime}ms)`);
+
+            res.writeHead(302, { 'Location': targetUrl, 'Access-Control-Allow-Origin': '*' });
+            res.end();
+        } catch (err) {
+            res.writeHead(500, { 'Content-Type': 'text/plain', 'Access-Control-Allow-Origin': '*' });
+            res.end('Server error');
+        }
+        return;
+    }
+
     // 解析路径格式: /模块/频道.m3u8
     let module = hb;
     let channelPath = path;

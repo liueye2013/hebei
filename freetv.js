@@ -12,7 +12,8 @@ const CHANNELS = [
     '中視菁采臺',
     '三沙衛視',
     '湖南衛視',
-    '甘肅衛視'
+    '甘肅衛視',
+    '蘇州文化生活'
 ];
 
 // 缓存：{ channelName: { link: string, time: number } }
